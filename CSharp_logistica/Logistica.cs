@@ -8,7 +8,7 @@ namespace CSharp_logistica
     public partial class form_logistica : Form
     {
         bool editMode = false;
-
+        Veiculo editedVeiculo;
         public form_logistica()
         {
             InitializeComponent();
@@ -21,6 +21,7 @@ namespace CSharp_logistica
             dgv_veiculos.RowTemplate.Height = 30;
             dgv_veiculos.RowTemplate.MinimumHeight = 25;
             dgv_veiculos.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
+            dgv_veiculos.AllowUserToAddRows = false;
 
             dgv_veiculos.Visible = false;
         }
@@ -63,18 +64,48 @@ namespace CSharp_logistica
                 MessageBox.Show("Consumo Médio e Carga Máxima devem ser valores numéricos e obrigatorios!!");
                 return;
             }
-            if (editMode == false)
-            {
-                Veiculo veiculo = new Veiculo(placaVeiculo, modeloVeiculo, consumoMedio, cargaMaxima);
-                try
-                {
 
+
+            try
+            {
+                if (editMode == false)
+                {
+                    Veiculo veiculo = new Veiculo(placaVeiculo, modeloVeiculo, consumoMedio, cargaMaxima);
                     if (veiculo.AddVeiculoBanco()) { LimparCampos(); }
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show("Erro" + ex);
+                    string id = txtbox_idveiculo.Text;
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        MessageBox.Show("Escolha um Veiculo para editar no grid antes de salvar!!", "Antenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    int codigoVeiculo = int.Parse(txtbox_idveiculo.Text);
+
+                    Veiculo veiculo = new Veiculo(codigoVeiculo, placaVeiculo, modeloVeiculo, consumoMedio, cargaMaxima);
+
+                    if (veiculo.EqualsVeiculo(editedVeiculo))
+                    {
+                        MessageBox.Show("Tentando Salvar o veiculo com os mesmo valores!!", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else
+                    {
+                        veiculo.EditVeiculo();
+                        LimparCampos();
+                        bt_cadveiculo.Image = Properties.Resources.Cadastrar;
+                        bt_delveiculo.Image = Properties.Resources.Deletar;
+                        editMode = false;
+                        AtualizarGrid();
+
+                    }
+
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro" + ex);
             }
 
 
@@ -90,6 +121,7 @@ namespace CSharp_logistica
                 editMode = false;
                 bt_cadveiculo.Image = Properties.Resources.Cadastrar;
                 bt_delveiculo.Image = Properties.Resources.Deletar;
+                LimparCampos();
 
             }
             else
@@ -104,22 +136,43 @@ namespace CSharp_logistica
 
         private void bt_edtveiculo_Click(object sender, EventArgs e)
         {
-            if (dgv_veiculos.Visible)
+            if (dgv_veiculos.Visible && dgv_veiculos.SelectedRows.Count > 0)
             {
                 if (!editMode)
                 {
+                    var linha = dgv_veiculos.SelectedRows[0];
+
+                    string placaVeiculo = linha.Cells["PLACA"].Value.ToString();
+                    txtbox_placaveiculo.Text = placaVeiculo;
+
+                    string modeloVeiculo = linha.Cells["MODELO"].Value.ToString();
+                    txtbox_modeloveiculo.Text = modeloVeiculo;
+
+                    decimal consumoMedio = decimal.Parse(linha.Cells["CONSUMO_MEDIO"].Value.ToString());
+                    txtbox_consumomedio.Text = consumoMedio.ToString();
+
+                    decimal cargaMaxima = decimal.Parse(linha.Cells["CARGA_MAXIMA"].Value.ToString());
+                    txtbox_cargamaxima.Text = cargaMaxima.ToString();
+
+                    int codigoVeiculo = int.Parse(linha.Cells["VEICULOID"].Value.ToString());
+                    txtbox_idveiculo.Text = codigoVeiculo.ToString();
+
+
+                    editedVeiculo = new Veiculo(codigoVeiculo, placaVeiculo, modeloVeiculo, consumoMedio, cargaMaxima);
+
                     bt_cadveiculo.Image = Properties.Resources.Salvar;
                     bt_delveiculo.Image = Properties.Resources.Cancelar;
                     editMode = true;
                 }
                 else
                 {
-                    MessageBox.Show("Modo de Edicao ja ativo!!", "Atencao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Modo de Edição ja ativo!!", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             else
             {
-                MessageBox.Show("Mostre o grafico e selecione um Veiculo antes de editar.", "Atencao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Mostre o grafico e selecione um Veiculo antes de editar.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LimparCampos();
                 editMode = false;
             }
         }
@@ -133,17 +186,41 @@ namespace CSharp_logistica
             txtbox_placaveiculo.Text = string.Empty;
         }
 
+
+        public void AtualizarGrid()
+        {
+            var dt = Veiculo.ObterTodosVeiculos();
+            dgv_veiculos.DataSource = dt;
+            dgv_veiculos.AutoResizeRows();
+        }
+
         private void bt_delveiculo_Click(object sender, EventArgs e)
         {
            if (!editMode)
             {
-                MessageBox.Show("Deletado");
+                if (dgv_veiculos.SelectedRows.Count != 1)
+                {
+                    MessageBox.Show("Selecione um veículo para excluir.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                int codigoVeiculo = int.Parse(dgv_veiculos.SelectedRows[0].Cells["VEICULOID"].Value.ToString());
+                decimal cargaMaxima = decimal.Parse(dgv_veiculos.SelectedRows[0].Cells["CARGA_MAXIMA"].Value.ToString());
+                decimal consumoMedio = decimal.Parse(dgv_veiculos.SelectedRows[0].Cells["CONSUMO_MEDIO"].Value.ToString());
+                string modeloVeiculo = dgv_veiculos.SelectedRows[0].Cells["MODELO"].Value.ToString();
+                string placaVeiculo = dgv_veiculos.SelectedRows[0].Cells["PLACA"].Value.ToString();
+
+                Veiculo veiculo = new Veiculo(codigoVeiculo, placaVeiculo, modeloVeiculo, consumoMedio, cargaMaxima);
+                veiculo.DeleteVeiculoBanco();
+                AtualizarGrid();
+                LimparCampos();
             }
             else
             {
                 bt_cadveiculo.Image = Properties.Resources.Cadastrar;
                 bt_delveiculo.Image = Properties.Resources.Deletar;
                 editMode = false;
+                LimparCampos();
             }
         }
     }

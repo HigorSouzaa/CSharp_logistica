@@ -105,20 +105,22 @@ namespace CSharp_logistica.Classes
             }
         }
 
-        public void EditVeiculo(Veiculo veiculo)
+        public void EditVeiculo()
         {
             using var connection = Conexao.ObterConexao();
             string query = @"UPDATE VEICULO SET MODELO = @modelo,PLACA = @placa,CONSUMO_MEDIO = @consumo,CARGA_MAXIMA = @carga WHERE VEICULOID = @id";
             var cmd = new SQLiteCommand(query, connection);
             try
             {
-                cmd.Parameters.AddWithValue("@modelo", veiculo.modeloVeiculo);
-                cmd.Parameters.AddWithValue("@placa", veiculo.placaVeiculo);
-                cmd.Parameters.AddWithValue("@consumo", veiculo.consumoMedio);
-                cmd.Parameters.AddWithValue("@carga", veiculo.cargaMaxima);
-                cmd.Parameters.AddWithValue("@id", veiculo.codigoVeiculo);
+                cmd.Parameters.AddWithValue("@modelo", modeloVeiculo);
+                cmd.Parameters.AddWithValue("@placa", placaVeiculo);
+                cmd.Parameters.AddWithValue("@consumo", consumoMedio);
+                cmd.Parameters.AddWithValue("@carga", cargaMaxima);
+                cmd.Parameters.AddWithValue("@id", codigoVeiculo);
 
                 cmd.ExecuteNonQuery();
+                MessageBox.Show("Veiculo alterado com sucesso!!");
+
             }
 
             catch (Exception ex)
@@ -126,6 +128,27 @@ namespace CSharp_logistica.Classes
                 MessageBox.Show("Erro ao editar Veiculo!!" + ex);
             }
         }
+
+        public bool EqualsVeiculo(Veiculo outro)
+        {
+            if (outro == null) return false;
+
+            return this.placaVeiculo == outro.placaVeiculo &&
+                   this.modeloVeiculo == outro.modeloVeiculo &&
+                   this.consumoMedio == outro.consumoMedio &&
+                   this.cargaMaxima == outro.cargaMaxima;
+        }
+
+        public string mostrarInfoWtCode()
+        {
+            return $"Código: {codigoVeiculo}, Placa: {placaVeiculo}, Modelo: {modeloVeiculo}, Consumo Médio: {consumoMedio}, Carga Máxima: {cargaMaxima}";
+        }
+
+        public string mostrarInfoNoCode()
+        {
+            return $"Placa: {placaVeiculo}, Modelo: {modeloVeiculo}, Consumo Médio: {consumoMedio}, Carga Máxima: {cargaMaxima}";
+        }
+
 
     }
 }
