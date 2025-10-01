@@ -118,6 +118,7 @@
             bt_edtveiculo.Size = new Size(205, 40);
             bt_edtveiculo.TabIndex = 13;
             bt_edtveiculo.UseVisualStyleBackColor = true;
+            bt_edtveiculo.Click += bt_edtveiculo_Click;
             // 
             // bt_delveiculo
             // 
@@ -127,6 +128,7 @@
             bt_delveiculo.Size = new Size(205, 40);
             bt_delveiculo.TabIndex = 12;
             bt_delveiculo.UseVisualStyleBackColor = true;
+            bt_delveiculo.Click += bt_delveiculo_Click;
             // 
             // bt_showveiculos
             // 

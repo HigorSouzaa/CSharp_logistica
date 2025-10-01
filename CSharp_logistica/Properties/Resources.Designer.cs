@@ -73,6 +73,16 @@ namespace CSharp_logistica.Properties {
         /// <summary>
         ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Cancelar {
+            get {
+                object obj = ResourceManager.GetObject("Cancelar", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Deletar {
             get {
                 object obj = ResourceManager.GetObject("Deletar", resourceCulture);
@@ -86,6 +96,16 @@ namespace CSharp_logistica.Properties {
         internal static System.Drawing.Bitmap Editar {
             get {
                 object obj = ResourceManager.GetObject("Editar", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Fechar {
+            get {
+                object obj = ResourceManager.GetObject("Fechar", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

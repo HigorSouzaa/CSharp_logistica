@@ -30,7 +30,7 @@ namespace CSharp_logistica.Classes
             this.codigoVeiculo = codigoVeiculo;
         }
 
-        public void AddVeiculoBanco()
+        public bool AddVeiculoBanco()
         {
             using(var connection = Conexao.ObterConexao())
             {
@@ -46,10 +46,12 @@ namespace CSharp_logistica.Classes
                         command.ExecuteNonQuery();
                     }
                     MessageBox.Show("Veículo adicionado com sucesso!");
+                    return true;
                 }
                 catch (Exception ex)
-                {
+                { 
                     MessageBox.Show("Erro ao adicionar veículo: " + ex.Message);
+                    return false;
                 }
             }        
         }
@@ -100,6 +102,28 @@ namespace CSharp_logistica.Classes
                 MessageBox.Show("Erro ao obter veículos: " + ex.Message);
                 var dt = new DataTable();
                 return dt;
+            }
+        }
+
+        public void EditVeiculo(Veiculo veiculo)
+        {
+            using var connection = Conexao.ObterConexao();
+            string query = @"UPDATE VEICULO SET MODELO = @modelo,PLACA = @placa,CONSUMO_MEDIO = @consumo,CARGA_MAXIMA = @carga WHERE VEICULOID = @id";
+            var cmd = new SQLiteCommand(query, connection);
+            try
+            {
+                cmd.Parameters.AddWithValue("@modelo", veiculo.modeloVeiculo);
+                cmd.Parameters.AddWithValue("@placa", veiculo.placaVeiculo);
+                cmd.Parameters.AddWithValue("@consumo", veiculo.consumoMedio);
+                cmd.Parameters.AddWithValue("@carga", veiculo.cargaMaxima);
+                cmd.Parameters.AddWithValue("@id", veiculo.codigoVeiculo);
+
+                cmd.ExecuteNonQuery();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao editar Veiculo!!" + ex);
             }
         }
 

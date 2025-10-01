@@ -9,7 +9,7 @@ namespace CSharp_logistica.Classes
 {
     public static class Conexao
     {
-        private static readonly string dbPath = @"C:\Users\higor.hlesouza\source\repos\CSharp_logistica\Logistica.db";
+        private static readonly string dbPath = @"D:\Arquivos\Dev\Desk\CSharp_logistica\Logistica.db";
         private static readonly string connectionString = $"Data Source={dbPath};Version=3;";
 
         public static SQLiteConnection ObterConexao()
