@@ -30,6 +30,16 @@ namespace CSharp_logistica.Classes
             this.codigoVeiculo = codigoVeiculo;
         }
 
+        public int GetCodigo()
+        {
+            return codigoVeiculo;
+        }
+
+        public override string ToString()
+        {
+            return $"{modeloVeiculo} - {placaVeiculo}";
+        }
+
         public bool AddVeiculoBanco()
         {
             using(var connection = Conexao.ObterConexao())
@@ -84,7 +94,7 @@ namespace CSharp_logistica.Classes
             }
         }
 
-        public static DataTable ObterTodosVeiculos()
+        public static DataTable ObterTabelaTodosVeiculos()
         { 
             using var connection = Conexao.ObterConexao();
             string query = "SELECT * FROM VEICULO";
@@ -137,6 +147,37 @@ namespace CSharp_logistica.Classes
                    this.modeloVeiculo == outro.modeloVeiculo &&
                    this.consumoMedio == outro.consumoMedio &&
                    this.cargaMaxima == outro.cargaMaxima;
+        }
+
+        public static List<Veiculo> ObterTodosVeiculos()
+        {
+            List<Veiculo> veiculos = new List<Veiculo>();
+            using var connection = Conexao.ObterConexao();
+            string query = "SELECT * FROM VEICULO";
+            try
+            {
+                using var command = new SQLiteCommand(query, connection);
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    int codigoVeiculo = Convert.ToInt32(reader["VEICULOID"]);
+                    string placaVeiculo = reader["PLACA"].ToString();
+                    string modeloVeiculo = reader["MODELO"].ToString();
+                    decimal consumoMedio = Convert.ToDecimal(reader["CONSUMO_MEDIO"]);
+                    decimal cargaMaxima = Convert.ToDecimal(reader["CARGA_MAXIMA"]);
+                    Console.WriteLine($"Código: {codigoVeiculo}, Placa: {placaVeiculo}, Modelo: {modeloVeiculo}, Consumo Médio: {consumoMedio}, Carga Máxima: {cargaMaxima}");
+                   
+                    Veiculo veiculo = new Veiculo(codigoVeiculo, placaVeiculo, modeloVeiculo, consumoMedio, cargaMaxima);
+                    veiculos.Add(veiculo);
+
+                }
+                return veiculos;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao obter veículos: " + ex.Message);
+                return new List<Veiculo>();
+            }
         }
 
         public string mostrarInfoWtCode()

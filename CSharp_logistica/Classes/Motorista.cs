@@ -27,6 +27,16 @@ namespace CSharp_logistica.Classes
             this.codigoMotorista = codigoMotorista;
         }
 
+        public int GetCodigo()
+        {
+            return codigoMotorista;
+        }
+
+        public override string ToString()
+        {
+            return $"{nomeMotorista} - {cnhMotorista}";
+        }
+
         // Adiciona motorista ao banco
         public bool AddMotoristaBanco()
         {
@@ -84,7 +94,7 @@ namespace CSharp_logistica.Classes
         }
 
         // Consulta todos os motoristas
-        public static DataTable ObterTodosMotoristas()
+        public static DataTable ObterTabelaTodosMotoristas()
         {
             using var connection = Conexao.ObterConexao();
             string query = "SELECT * FROM MOTORISTA";
@@ -132,6 +142,38 @@ namespace CSharp_logistica.Classes
             return this.nomeMotorista == outro.nomeMotorista &&
                    this.cnhMotorista == outro.cnhMotorista &&
                    this.telefoneMotorista == outro.telefoneMotorista;
+        }
+
+        public static List<Motorista> ObterTodosMotoristas()
+        {
+            var motoristas = new List<Motorista>();
+            using (var connection = Conexao.ObterConexao())
+            {
+                string query = "SELECT * FROM MOTORISTA";
+                try
+                {
+                    using (var command = new SQLiteCommand(query, connection))
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int codigo = reader.GetInt32(0);
+                            string nome = reader.GetString(1);
+                            string cnh = reader.GetString(2);
+                            string telefone = reader.GetString(3);
+                            var motorista = new Motorista(codigo, nome, cnh, telefone);
+                            motoristas.Add(motorista);
+                        }
+                    }
+                    return motoristas;
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Erro ao obter motoristas: " + ex.Message);
+                    return motoristas;
+                }
+            }
         }
 
         // Info com código

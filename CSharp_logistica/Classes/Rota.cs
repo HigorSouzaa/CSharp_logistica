@@ -26,6 +26,16 @@ namespace CSharp_logistica.Classes
             this.codigoRota = codigoRota;
         }
 
+        public int GetCodigo()
+        {
+            return codigoRota;
+        }
+
+        public override string ToString()
+        {
+            return $"{origemRota} - {destinoRota}";
+        }
+
         // Adiciona rota ao banco
         public bool AddRotaBanco()
         {
@@ -83,7 +93,7 @@ namespace CSharp_logistica.Classes
         }
 
         // Consulta todas as rotas
-        public static DataTable ObterTodasRotas()
+        public static DataTable ObterTabelaTodasRotas()
         {
             using var connection = Conexao.ObterConexao();
             string query = "SELECT * FROM ROTA";
@@ -132,6 +142,38 @@ namespace CSharp_logistica.Classes
                    this.destinoRota == outra.destinoRota &&
                    this.distanciaRota == outra.distanciaRota;
         }
+
+        public static List<Rota> ObterTodasRotas()
+        {
+            var rotas = new List<Rota>();
+            using (var connection = Conexao.ObterConexao())
+            {
+                string query = "SELECT * FROM ROTA";
+                try
+                {
+                    using (var command = new SQLiteCommand(query, connection))
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int codigo = reader.GetInt32(0);
+                            string origem = reader.GetString(1);
+                            string destino = reader.GetString(2);
+                            decimal distancia = reader.GetDecimal(3);
+                            var rota = new Rota(codigo, origem, destino, distancia);
+                            rotas.Add(rota);
+                        }
+                    }
+                    return rotas;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Erro ao obter rotas: " + ex.Message);
+                    return rotas;
+                }
+            }
+        }
+
 
         // Exibe informações da rota com código
         public string MostrarInfoWtCode()

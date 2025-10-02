@@ -11,6 +11,8 @@ namespace CSharp_logistica
         bool editModeMotorista = false;
         bool editModeRota = false;
         bool editModeCombustivel = false;
+        bool editModeViagem = false;
+        Viagem editedViagem;
         PrecoCombustivel editedPrecoCombustivel;
         Rota editedRota;
         Veiculo editedVeiculo;
@@ -72,6 +74,12 @@ namespace CSharp_logistica
             dgv_comb.RowTemplate.MinimumHeight = 25;
             dgv_comb.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
             dgv_comb.AllowUserToAddRows = false;
+
+            dgv_viagem.Visible = false;
+            dgv_viagem.RowTemplate.Height = 30;
+            dgv_viagem.RowTemplate.MinimumHeight = 25;
+            dgv_viagem.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
+            dgv_viagem.AllowUserToAddRows = false;
         }
 
         /// ------------------------------------ 
@@ -95,7 +103,7 @@ namespace CSharp_logistica
         // Atualiza o DataGridView com os dados da tabela VEICULO
         public void AtualizarGridVeiculos()
         {
-            var dt = Veiculo.ObterTodosVeiculos();
+            var dt = Veiculo.ObterTabelaTodosVeiculos();
             dgv_veiculos.DataSource = dt;
             dgv_veiculos.AutoResizeRows();
         }
@@ -115,7 +123,7 @@ namespace CSharp_logistica
             }
             else
             {
-                var dt = Veiculo.ObterTodosVeiculos();
+                var dt = Veiculo.ObterTabelaTodosVeiculos();
                 dgv_veiculos.DataSource = dt;
                 dgv_veiculos.AutoResizeRows();
                 bt_showveiculos.Image = Properties.Resources.Fechar; // Botão muda para 'fechar'
@@ -253,7 +261,6 @@ namespace CSharp_logistica
             }
             else
             {
-                // Cancelar modo edição
                 bt_cadveiculo.Image = Properties.Resources.Cadastrar;
                 bt_delveiculo.Image = Properties.Resources.Deletar;
                 editModeVeiculos = false;
@@ -268,7 +275,7 @@ namespace CSharp_logistica
         /// 
         /// 
         /// ------------------------------------ 
-        
+
 
         // Limpa os campos dos inputs do Motorista
         public void LimparCamposMotorista()
@@ -282,7 +289,7 @@ namespace CSharp_logistica
         // Atualiza o DataGridView com os dados da tabela MOTORISTA
         public void AtualizarGridMotorista()
         {
-            var dt = Motorista.ObterTodosMotoristas();
+            var dt = Motorista.ObterTabelaTodosMotoristas();
             dgv_mta.DataSource = dt;
             dgv_mta.AutoResizeRows();
         }
@@ -303,7 +310,7 @@ namespace CSharp_logistica
             }
             else
             {
-                var dt = Motorista.ObterTodosMotoristas();
+                var dt = Motorista.ObterTabelaTodosMotoristas();
                 dgv_mta.DataSource = dt;
                 dgv_mta.AutoResizeRows();
                 bt_mtashow.Image = Properties.Resources.Fechar;
@@ -459,7 +466,7 @@ namespace CSharp_logistica
         // Atualiza o DataGridView com os dados da tabela ROTA
         public void AtualizarGridRota()
         {
-            var dt = Rota.ObterTodasRotas();
+            var dt = Rota.ObterTabelaTodasRotas();
             dgv_rt.DataSource = dt;
             dgv_rt.AutoResizeRows();
         }
@@ -479,7 +486,7 @@ namespace CSharp_logistica
             }
             else
             {
-                var dt = Rota.ObterTodasRotas();
+                var dt = Rota.ObterTabelaTodasRotas();
                 dgv_rt.DataSource = dt;
                 dgv_rt.AutoResizeRows();
                 bt_rtshow.Image = Properties.Resources.Fechar;
@@ -784,7 +791,7 @@ namespace CSharp_logistica
                 decimal preco = decimal.Parse(dgv_comb.SelectedRows[0].Cells["PRECO"].Value.ToString());
 
 
-                PrecoCombustivel pc = new PrecoCombustivel(codigo, tipo,preco,dataConsulta);
+                PrecoCombustivel pc = new PrecoCombustivel(codigo, tipo, preco, dataConsulta);
                 pc.DeletePrecoCombustivelBanco();
 
                 AtualizarGridCombustivel();
@@ -799,5 +806,240 @@ namespace CSharp_logistica
             }
         }
 
+
+
+        /// ------------------------------------ 
+        /// 
+        /// 
+        /// Viagem
+        /// 
+        /// 
+        /// ------------------------------------ 
+
+
+        private void tb_viagem_Enter(object sender, EventArgs e)
+        {
+            cb_viagemveiculo.Items.Clear();
+            cb_viagemrota.Items.Clear();
+            cb_viagemmotorista.Items.Clear();
+
+            List<Veiculo> veiculos = Veiculo.ObterTodosVeiculos();
+            List<Rota> rotas = Rota.ObterTodasRotas();
+            List<Motorista> motoristas = Motorista.ObterTodosMotoristas();
+
+
+            foreach (var veiculo in veiculos)
+            {
+                cb_viagemveiculo.Items.Add(veiculo);
+            }
+            foreach (var rota in rotas)
+            {
+                cb_viagemrota.Items.Add(rota);
+            }
+            foreach (var motorista in motoristas)
+            {
+                cb_viagemmotorista.Items.Add(motorista);
+            }
+
+            cb_viagemstatus.Visible = false;
+            lb_viagemstatus.Visible = false;
+
+        }
+
+        public void LimparCamposViagem()
+        {
+            txtbox_viagemid.Text = string.Empty;
+            dtp_viagemsaida.Value = DateTime.Today;
+            dtp_viagemchegada.Value = DateTime.Today;
+            cb_viagemveiculo.SelectedIndex = -1;
+            cb_viagemrota.SelectedIndex = -1;
+            cb_viagemmotorista.SelectedIndex = -1;
+            cb_viagemstatus.SelectedIndex = -1;
+        }
+
+        public void AtualizarGridViagem()
+        {
+            var dt = Viagem.ObterTabelaTodasViagens();
+            dgv_viagem.DataSource = dt;
+            dgv_viagem.AutoResizeRows();
+
+            dgv_viagem.Columns["VEICULOID"].Visible = false;
+            dgv_viagem.Columns["MOTORISTAID"].Visible = false;
+            dgv_viagem.Columns["ROTAID"].Visible = false;
+        }
+
+        private void bt_viagemcad_Click(object sender, EventArgs e)
+        {
+            // Verifica se todos os campos estão preenchidos
+            if (cb_viagemveiculo.SelectedIndex == -1 || cb_viagemrota.SelectedIndex == -1 ||
+                cb_viagemmotorista.SelectedIndex == -1)
+            {
+                MessageBox.Show("Todos os campos devem ser preenchidos!", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            Veiculo veiculoSelecionado = (Veiculo)cb_viagemveiculo.SelectedItem;
+            int veiculoId = veiculoSelecionado.GetCodigo();
+
+            Motorista motoristaSelecionado = (Motorista)cb_viagemmotorista.SelectedItem;
+            int motoristaId = motoristaSelecionado.GetCodigo();
+
+            Rota rotaSelecionada = (Rota)cb_viagemrota.SelectedItem;
+            int rotaId = rotaSelecionada.GetCodigo();
+
+            DateTime saida = dtp_viagemsaida.Value;
+            DateTime chegada = dtp_viagemchegada.Value;
+            string status = cb_viagemstatus.SelectedItem?.ToString();
+
+            try
+            {
+                if (!editModeViagem)
+                {
+                    var viagem = new Viagem(veiculoId, motoristaId, rotaId, saida, chegada, "Em andamento");
+                    if (viagem.AddViagemBanco())
+                    {
+                        LimparCamposViagem();
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(txtbox_viagemid.Text))
+                    {
+                        MessageBox.Show("Escolha uma viagem para editar no grid antes de salvar!!", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    int id = int.Parse(txtbox_viagemid.Text);
+                    var viagem = new Viagem(id, veiculoId, motoristaId, rotaId, saida, chegada, status);
+
+                    if (viagem.EqualsViagem(editedViagem))
+                    {
+                        MessageBox.Show("Tentando salvar com os mesmos valores!!", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else
+                    {
+                        viagem.EditViagem();
+                        LimparCamposViagem();
+                        bt_viagemcad.Image = Properties.Resources.Cadastrar;
+                        bt_viagemdelete.Image = Properties.Resources.Deletar;
+                        editModeViagem = false;
+                        AtualizarGridViagem();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro: " + ex.Message);
+            }
+        }
+
+        private void bt_viagemshow_Click(object sender, EventArgs e)
+        {
+            if (dgv_viagem.Visible)
+            {
+                dgv_viagem.Visible = false;
+                dgv_viagem.ClearSelection();
+                bt_viagemshow.Image = Properties.Resources.MostrarTodos;
+                editModeViagem = false;
+                bt_viagemcad.Image = Properties.Resources.Cadastrar;
+                bt_viagemdelete.Image = Properties.Resources.Deletar;
+                LimparCamposViagem();
+                cb_viagemstatus.Visible = false;
+                lb_viagemstatus.Visible = false;
+
+            }
+            else
+            {
+                AtualizarGridViagem();
+                dgv_viagem.Visible = true;
+                bt_viagemshow.Image = Properties.Resources.Fechar;
+            }
+        }
+
+        private void bt_viagemedit_Click(object sender, EventArgs e)
+        {
+            if (dgv_viagem.Visible && dgv_viagem.SelectedRows.Count > 0)
+            {
+                if (!editModeViagem)
+                {
+                    var linha = dgv_viagem.SelectedRows[0];
+                    txtbox_viagemid.Text = linha.Cells["VIAGEMID"].Value.ToString();
+
+                    int veiculoId = Convert.ToInt32(linha.Cells["VEICULOID"].Value);
+                    int motoristaId = Convert.ToInt32(linha.Cells["MOTORISTAID"].Value);
+                    int rotaId = Convert.ToInt32(linha.Cells["ROTAID"].Value);
+
+                    cb_viagemveiculo.SelectedIndex = Veiculo.ObterTodosVeiculos().FindIndex(v => v.GetCodigo() == veiculoId);
+                    cb_viagemrota.SelectedIndex = Rota.ObterTodasRotas().FindIndex(r => r.GetCodigo() == rotaId);
+                    cb_viagemmotorista.SelectedIndex = Motorista.ObterTodosMotoristas().FindIndex(m => m.GetCodigo() == motoristaId);
+
+                    dtp_viagemsaida.Value = Convert.ToDateTime(linha.Cells["DATA_SAIDA"].Value);
+                    dtp_viagemchegada.Value = Convert.ToDateTime(linha.Cells["DATA_CHEGADA"].Value);
+
+                    cb_viagemstatus.Visible = true;
+                    lb_viagemstatus.Visible = true;
+
+                    string sit = linha.Cells["SITUACAO"].Value.ToString();
+                    int idxStatus = cb_viagemstatus.FindStringExact(sit);
+                    cb_viagemstatus.SelectedIndex = idxStatus >= 0 ? idxStatus : 0;
+
+                    editedViagem = new Viagem(
+                        int.Parse(txtbox_viagemid.Text),
+                        veiculoId, motoristaId, rotaId,
+                        dtp_viagemsaida.Value, dtp_viagemchegada.Value, sit
+                    );
+
+                    bt_viagemcad.Image = Properties.Resources.Salvar;
+                    bt_viagemdelete.Image = Properties.Resources.Cancelar;
+                    editModeViagem = true;
+                }
+                else
+                {
+                    MessageBox.Show("Modo de edição já ativo!!");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Mostre o grid e selecione uma viagem antes de editar.");
+                LimparCamposViagem();
+                editModeViagem = false;
+            }
+        }
+
+        private void bt_viagemdelete_Click(object sender, EventArgs e)
+        {
+            if (!editModeViagem)
+            {
+                {
+                    if (dgv_viagem.SelectedRows.Count != 1)
+                    {
+                        MessageBox.Show("Selecione uma viagem para excluir.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
+                    int id = int.Parse(dgv_viagem.SelectedRows[0].Cells["VIAGEMID"].Value.ToString());
+                    string status = dgv_viagem.SelectedRows[0].Cells["SITUACAO"].Value.ToString();
+                    int veiculoId = Convert.ToInt32(dgv_viagem.SelectedRows[0].Cells["VEICULOID"].Value);
+                    int motoristaId = Convert.ToInt32(dgv_viagem.SelectedRows[0].Cells["MOTORISTAID"].Value);
+                    int rotaId = Convert.ToInt32(dgv_viagem.SelectedRows[0].Cells["ROTAID"].Value);
+                    DateTime saida = Convert.ToDateTime(dgv_viagem.SelectedRows[0].Cells["DATA_SAIDA"].Value);
+                    DateTime chegada = Convert.ToDateTime(dgv_viagem.SelectedRows[0].Cells["DATA_CHEGADA"].Value);
+
+                    var viagem = new Viagem(id, veiculoId, motoristaId, rotaId, saida, chegada, status);
+                    viagem.DeleteViagemBanco();
+
+                    AtualizarGridViagem();
+                    LimparCamposViagem();
+                }
+            }
+            else
+            {
+                bt_viagemcad.Image = Properties.Resources.Cadastrar;
+                bt_viagemdelete.Image = Properties.Resources.Deletar;
+                cb_viagemstatus.Visible = false;
+                lb_viagemstatus.Visible = false;
+                editModeViagem = false;
+                LimparCamposViagem();
+            }
+        }
     }
 }
